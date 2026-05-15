@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diário de Classe - Aula 11.1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            background-color: #35495e;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 20px;
+        }
+        
+        main {
+            width: 80%;
+            max-width: 600px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .inputAluno {
+            margin-bottom: 15px;
+        }
+        
+        .inputAluno label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .inputAluno input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .notas-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #42b883;
+            color: white;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        button:last-child {
+            background-color: #e74c3c;
+        }
+        
+        .conteudo table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+        }
+        
+        .conteudo th, .conteudo td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .conteudo th {
+            background-color: #35495e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Diário de Classe</h1>
+    </header>
+    <main>
+        <h2>Alunos</h2>
+        <span>Turma Programação Cliente</span>
+        <div class="card">
+            <div class="inputAluno">
+                <label>Nome Aluno</label>
+                <input type="text" id="nome" placeholder="Informe o nome do aluno">
+            </div>
+            
+            <div class="notas-group">
+                <div class="inputAluno">
+                    <label>Av1</label>
+                    <input type="number" id="nota1" placeholder="Nota 1">
+                </div>
+                <div class="inputAluno">
+                    <label>Av2</label>
+                    <input type="number" id="nota2" placeholder="Nota 2">
+                </div>
+                <div class="inputAluno">
+                    <label>Av3</label>
+                    <input type="number" id="nota3" placeholder="Nota 3">
+                </div>
+            </div>
+
+            <button onclick="aluno.Adicionar()">Adicionar</button>
+            <button onclick="aluno.Limpar()">Limpar</button>
+        </div>
+
+        <div class="conteudo">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Média Final</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        class Aluno {
+            constructor() {
+                this.id = 1;
+                this.arrayAlunos = [];
+            }
+
+            Adicionar() {
+                let aluno = this.LerDados();
+
+                if (this.Validar(aluno)) {
+                    this.Salvar(aluno);
+                    this.Listar();
+                    this.Limpar();
+                }
+            }
+
+            LerDados() {
+                let aluno = {};
+                aluno.id = this.id;
+                aluno.nomeAluno = document.getElementById('nome').value;
+                
+                // Pegando os valores das notas para o cálculo ponderado
+                let n1 = parseFloat(document.getElementById('nota1').value);
+                let n2 = parseFloat(document.getElementById('nota2').value);
+                let n3 = parseFloat(document.getElementById('nota3').value);
+
+                // Cálculo da Média Ponderada (Peso 2 para Av1 e Av2, Peso 1 para Av3)
+                // Usamos .toFixed(2) para arredondar para 2 casas decimais
+                if (!isNaN(n1) && !isNaN(n2) && !isNaN(n3)) {
+                    aluno.mediaAluno = (((n1 * 2) + (n2 * 2) + n3) / 5).toFixed(2);
+                } else {
+                    aluno.mediaAluno = ""; // Caso não sejam números
+                }
+
+                return aluno;
+            }
+
+            Validar(aluno) {
+                let msg = '';
+                if (aluno.nomeAluno == '') {
+                    msg += '- Informe o nome do aluno \n';
+                }
+                if (document.getElementById('nota1').value == '' || 
+                    document.getElementById('nota2').value == '' || 
+                    document.getElementById('nota3').value == '') {
+                    msg += '- Informe as três notas do aluno \n';
+                }
+
+                if (msg != '') {
+                    alert(msg);
+                    return false;
+                }
+                return true;
+            }
+
+            Salvar(aluno) {
+                this.arrayAlunos.push(aluno);
+                this.id++;
+            }
+
+            Listar() {
+                let tbody = document.getElementById('tbody');
+                tbody.innerText = ''; 
+
+                for (let i = 0; i < this.arrayAlunos.length; i++) {
+                    let tr = tbody.insertRow();
+
+                    let td_id = tr.insertCell();
+                    let td_nome = tr.insertCell();
+                    let td_media = tr.insertCell();
+                    let td_remover = tr.insertCell();
+
+                    td_id.innerText = this.arrayAlunos[i].id;
+                    td_nome.innerText = this.arrayAlunos[i].nomeAluno;
+                    td_media.innerText = this.arrayAlunos[i].mediaAluno;
+
+                    let btnRemover = document.createElement('button');
+                    btnRemover.innerText = 'Remover';
+                    // Correção: Passando o ID correto para a função de remoção
+                    btnRemover.setAttribute("onclick", `aluno.Remover(${this.arrayAlunos[i].id})`);
+                    td_remover.appendChild(btnRemover);
+                }
+            }
+
+            Limpar() {
+                document.getElementById('nome').value = '';
+                document.getElementById('nota1').value = '';
+                document.getElementById('nota2').value = '';
+                document.getElementById('nota3').value = '';
+            }
+
+            Remover(id) {
+                if (confirm('Deseja realmente remover o aluno ID ' + id + '?')) {
+                    for (let i = 0; i < this.arrayAlunos.length; i++) {
+                        if (this.arrayAlunos[i].id == id) {
+                            this.arrayAlunos.splice(i, 1);
+                            break;
+                        }
+                    }
+                    this.Listar(); // Atualiza a tabela após remover
+                }
+            }
+        }
+
+        var aluno = new Aluno();
+    </script>
+</body>
+</html>
